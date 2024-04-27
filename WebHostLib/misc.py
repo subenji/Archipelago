@@ -23,6 +23,10 @@ def register_session():
     if not session.get("_id", None):
         session["_id"] = uuid4()  # uniquely identify each session without needing a login
 
+@app.after_request
+def no_robots(req):
+    req.headers["X-Robots-Tag"] = "none"
+    return req
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
@@ -190,3 +194,7 @@ def get_sitemap():
             has_settings: bool = isinstance(world.web.options_page, bool) and world.web.options_page
             available_games.append({ 'title': game, 'has_settings': has_settings })
     return render_template("siteMap.html", games=available_games)
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
